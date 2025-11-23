@@ -1,0 +1,9 @@
+<?php
+session_start();
+extract($_REQUEST);
+if($oper=="setindex")$_SESSION["instruindex"]=$data;
+if($oper=="getindex"){
+  if(!isset($_SESSION["instruindex"]))$_SESSION["instruindex"]=1;
+  echo($_SESSION["instruindex"]);
+}
+?>

@@ -1,0 +1,11 @@
+   
+   //mouse wheel scroll  
+   $('#sel_knob, #skala').bind('mousewheel DOMMouseScroll', function (e) { 
+      obj=$(this).attr("id");
+      if (e.originalEvent.wheelDelta > 0 || e.originalEvent.detail < 0) {
+      wheel_jarum("l",e);
+      }
+      else {
+      wheel_jarum("r",e);
+      }
+    });

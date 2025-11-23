@@ -1,0 +1,121 @@
+  *{
+  	margin: 0;
+  	padding: 0;
+  }
+  table#layout{
+    width:100%;
+  }
+  td#alatukur{
+    width:50%;
+  }
+  td#operasi{
+    text-align: left;
+  }
+  
+  #body{
+    position:relative;
+    width:600px;
+    height:780px;
+    margin:0 auto 0 auto;
+    }
+  #body li{
+    position:absolute;
+    }
+  #skala{
+    width:390px;
+    height:200px;
+    left:40px;
+    top:70px;
+    border-radius:10px;
+    z-index:10;
+    }  
+  #selektor{
+    width:50px;
+    height:50px;
+    left:0px;
+    top:0px;
+    border: 0px solid red;
+    border-radius:50%;
+    z-index:10;
+    }        
+  #jarum{
+    background:url("../images/jarum_ukur.png") no-repeat;
+    width:480px;
+    height:480px;
+    left:100px;
+    top:90px;
+    left:0px;
+    border-radius:50%;
+    }
+  #axe_jarum{
+    width:3px;
+    height:3px;
+    top:330px;
+    left:240px;
+    }    
+  #jar_cover{
+    background:url("../images/jarcover.png") no-repeat;
+    width:180px;
+    height:58px;
+    left:100px;
+    top:285px;
+    left:152px;
+    opacity: 0.8;
+    }  
+  #axe_knob,#adj_knob,#sel_knob{
+    filter:brightness(1);
+    transition-duration: 0.5s;
+    border-radius: 50%;
+    }  
+  #sel_knob{
+    z-index:15;
+  }  
+  #axe_knob:hover,
+  #adj_knob:hover,
+  #sel_knob:hover{
+    filter:brightness(1.2);
+    transition-duration: 0.5s;
+    cursor:pointer;
+    } 
+  #selektor:hover{
+    cursor:pointer;
+    background:gray;
+    filter: opacity(0.15);
+  }
+  #hlp_button:hover,
+  #skala:hover{
+    cursor:pointer;
+    }
+  #koordinat{
+    background:white;
+    border-radius: 1px;
+    padding:5px;
+    left: 10px;
+    top:10px;
+    z-index:9000;
+  }
+  .horizontal{
+    height:1px;
+    width:100%;
+    background: blue;
+    z-index:20;
+  }     
+  .vertical{
+    height:100%;
+    width:1px;
+    background: red;
+    left:100px;
+    z-index:20;
+  }     
+  .horizontal,.vertical{
+    visibility:hidden;
+  } 
+  #hlp_button{
+    background:url("../images/help.png") no-repeat;
+    background-size:contain;
+    right:10px;
+    top:20px;
+    width:30px;
+    height:30px;
+    border-radius: 50%;
+  }    

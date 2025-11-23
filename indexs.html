@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Multimeter</title>
+  <link rel="shortcut icon" href="#" />
+  <link rel="icon" type="image/png" href="images/icon.png"/>
+  <link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+
+<body>
+<table id="layout">
+  <tr>
+    <td id="alatukur">
+    	<ul id="body" style="list-style: none;">
+        <li id="jarum"></li>
+        <li id="jar_cover"></li>
+        <li id="axe_knob"></li>
+        <li id="adj_knob"></li>
+        <li id="sel_knob"></li>
+        <li id="axe_jarum"></li>
+        <li id="koordinat"></li>
+        <li id="skala"></li>
+        <li id="selektor"></li>
+        <li class="horizontal"></li>
+        <li class="vertical"></li>
+        <li id="hlp_button" title="
+            >> JARUM UKUR <<
+            Menggerakkan Jarum Ukur:
+              Right = Bergerak ke kanan
+              Left = Bergerak ke kiri
+              Ctrl+Panah = Bergerak halus (smooth)	
+              Click pada Plat Ukur (jarum menuju langsung) 
+              
+            >> SAKLAR PILIH (SELECTOR) <<
+            Menggerakkan Selektor:
+              Down Arrow = Bergerak ke kanan
+              Up Arrow = Bergerak ke kiri
+              Click Angka Range = Selektor langsung menunjuk lokasi pointer
+              Click Selektor = Selektor berputar ke kanan;
+              Shift+Click selektor = Selektor berputar ke kiri; 
+            
+            >> ALAT UKUR / INSTRUMEN <<
+            Berganti alat ukur (Instrumen):
+              Huruf A atau Spacebar = Instrumen berikutnya 
+              Ctrl+Spacebar = Instrumen sebelumnya
+              "></li>
+    	</ul>
+    </td>
+    <td id="operasi">123</td>
+  </tr>
+</table>
+</body>
+</html>
+
+<script type="text/javascript" src="js/jquery-1.2.6.min.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+    var instrumindex=1;
+    var instrumcount=15;
+    var stepjarum=2;
+    var batasjarumL=-45;
+    var batasjarumR=45;
+    var derajadjarum=batasjarumL;
+    var posjarum="";
+    var stepSelektor=360/22;//16.36363;
+    var derajadSelektor=0;
+    var offsetSelektor=0; //sudut tambahan saat penempatan selector secara click
+    var axeoffset=$("#axe_jarum").offset();
+    var putaranObj=0;
+    var nilput=0;
+    var mousedown=false;
+    var keyboardFlag=0;
+    var instrum=[];
+    //-------------0--------1---------------------5----------------------9---------------------------
+    instrum[1]="body1.png,axe1.png,50,217,352,adjust1.png,100,378,376,selector1.png,200,118,464,90,22,8";
+    instrum[2]="body2.png,axe2.png,50,215,355,adjust9.png,80,379,363,selector2.png,190,140,468,0,22,0";
+    instrum[3]="body3.png,axe3.png,40,215,345,adjust3.png,100,372,432,selector3.png,215,128,478,0,24,0";
+    instrum[4]="body4.png,axe5.png,50,215,343,adjust4.png,50,67,399,selector4.png,168,153,439,0,24,0";
+    instrum[5]="body5.png,axe5.png,50,215,330,adjust14.png,65,58,385,selector5.png,158,161,431,0,20,0";
+    instrum[6]="body6.png,axe6.png,55,213,348,adjust6.png,120,372,372,selector6.png,200,122,468,90,22,8";
+    instrum[7]="body7.png,axe7.png,50,210,330,adjust7.png,100,355,375,selector7.png,200,122,470,0,22,0";
+    instrum[8]="body8.png,axe8.png,50,215,330,adjust8.png,100,375,375,selector8.png,194,122,468,-16,20,0";
+    instrum[9]="body9.png,axe9.png,90,188,341,adjust9.png,100,375,375,selector9.png,180,141,489,0,14,0";
+    instrum[10]="body10.png,axe7.png,40,218,335,adjust7.png,60,303,412,selector7.png,148,162,459,0,20,0";
+    instrum[11]="body11.png,axe11.png,50,215,330,adjust11.png,68,309,385,selector11.png,180,144,475,-90,20,0";
+    instrum[12]="body12.png,axe12.png,50,214,332,adjust12.png,80,364,394,selector12.png,190,143,428,0,24,0";
+    instrum[13]="body13.png,axe13.png,38,214,350,adjust9.png,100,375,375,selector13.png,200,133,474,0,13,0";
+    instrum[14]="body14.png,axe14.png,25,227,353,adjust14.png,65,52,398,selector14.png,170,155,436,0,20,0";
+    instrum[15]="body15.png,axe15.png,40,220,330,adjust15.png,40,391,375,selector15.png,169,152,480,0,22,0";
+    set_instrument();
+
+    $(document)
+      //reset keyborad flag
+      .keyup(function(e){
+        keyboardFlag=0;
+      })
+      .keydown(function(e){
+      //mencegah conuous pressing
+      keyboardFlag++;
+      if(keyboardFlag>1){
+        e.preventDefault();
+        return false;
+      }
+      //operasional gerak (jarum dan selektor)
+      switch(e.which) {
+        case 37: //left arrow
+        case 39: //right arrow
+          geser_jarum(e);
+          break;
+        case 38: //arrow down
+        case 40: //arrow up
+          geser_selektor(e);
+          break;
+        case 32: //ganti instrumen
+        case 65: //ganti instrumen
+          ganti_instrumen(e);
+          break;
+       default: 
+          return; // exit this handler for other keys
+      }
+    }); 
+     
+    $("#body")
+      .click(function(e){
+        if(e.ctrlKey && e.shiftKey){
+        var offs=$(this).offset();
+        $("#koordinat").css("visibilty","visible").html((e.pageX-offs.left)+","+e.pageY);
+        }
+      })
+      .mousemove(function(e){
+        if(e.ctrlKey && e.shiftKey){
+          crosshair(e,$("#body"),true);
+          }else{
+          crosshair(e,$("#body"),false);
+          }
+      })
+      .mouseover(function(){
+        $("window").css("overflow","hidden");
+      })
+      .mouseout(function(){
+        $("window").css("overflow","auto");
+      });
+    
+    $("#skala").mousedown(function(ev){
+      var pi=Math.PI;
+      var sudutklik=(Math.atan2(eval(ev.clientY - axeoffset.top),eval(ev.clientX - axeoffset.left)))*(eval(180/pi))+90;
+      if(sudutklik<=batasjarumL)sudutklik=batasjarumL;
+      if(sudutklik>=batasjarumR)sudutklik=batasjarumR;
+      putar("#jarum",sudutklik);
+      derajadjarum=sudutklik;
+    })
+    
+    $("#selektor").mousedown(function(e){
+      var o=$(this);//objek selektor
+      var cY=eval(o.offset().top+o.width()/2);  //center Y
+      var cL=eval(o.offset().left+o.width()/2); //center X
+      var pi=Math.PI;
+      var sudutklik=(Math.atan2(eval(e.pageY - cY),eval(e.pageX - cL)))*(eval(180/pi))+90;
+      var steps=Math.round(sudutklik / stepSelektor); //jumlah step perpindahan
+      var sudut=parseFloat(stepSelektor * steps)+eval(offsetSelektor);
+      putar("#sel_knob",sudut);
+      derajadSelektor=sudut;
+    })
+    
+    //INFINITY    
+    $("#axe_knob").click(function(e){
+      putar_objek($(this),20,e);
+      if(derajadjarum<-40){
+        batas_jarum(e,"L");
+        putar("#jarum",batasjarumL);
+      }
+    })
+    
+    //ZERO OHM
+    $("#adj_knob").click(function(e){
+      putar_objek($(this),20,e);
+      if(derajadjarum>40){
+        batas_jarum(e,"R");
+        putar("#jarum",batasjarumR);
+      }
+    })    
+    function set_instrument(){
+      $.post("session.php?oper=getindex",function(idx){
+        $("#koordinat").text(idx); 
+        var ob=instrum[idx].split(",");
+        $("#body").css("background","url('images/bodies/"+ob[0]+"') no-repeat");
+        $("#axe_knob").css("background","url('images/"+ob[1]+"') no-repeat")
+          .css({"background-position":"center center","background-size": "contain"})
+          .css({"width":ob[2]+"px","height":ob[2]+"px","left":ob[3]+"px","top":ob[4]+"px"});
+        $("#adj_knob").css("background","url('images/"+ob[5]+"') no-repeat")
+          .css({"background-position":"center center","background-size": "contain"})
+          .css({"width":ob[6]+"px","height":ob[6]+"px","left":ob[7]+"px","top":ob[8]+"px"});
+        $("#sel_knob").css("background","url('images/"+ob[9]+"') no-repeat")
+          .css({"background-position":"center center","background-size": "contain"})
+          .css({"width":ob[10]+"px","height":ob[10]+"px","left":ob[11]+"px","top":ob[12]+"px"});
+        if(posjarum=="")putar("#jarum",derajadjarum);  //mengendalikan posisi jarum
+        putar("#sel_knob",ob[13]);            //reset posisi selector
+        derajadSelektor=ob[13];               //posisi selektor (setelah reset)
+        stepSelektor=eval(360/ob[14]);        //step putaran selektor  
+        offsetSelektor=ob[15];
+        set_hotarea_selektor(ob[10],ob[11],ob[12]);
+      })
+    }
+
+    function set_hotarea_selektor(size,left,top){
+      var ofset=50;
+      $("#selektor")
+      .css({"width" : parseFloat(eval(size)+(2*ofset))+"px", "height" : parseFloat(eval(size)+(2*ofset))+"px" })
+      .css({"left" : parseFloat(eval(left)-ofset)+"px", "top" : parseFloat(eval(top)-ofset)+"px" });
+    }
+            
+    function putar(objek,derajad){
+      putaran="rotate("+derajad+"deg)";
+      $(objek).css({"-moz-transform" : putaran, "-webkit-transform" : putaran,"transform":putaran,transition: '.5s all'});
+      $("#koordinat").text("L"+batasjarumL+" R"+batasjarumR+" jarum"+derajadjarum);
+    }
+
+    function putar_objek(obj,step,e){
+      var objId=$(obj).attr("id");
+      var putCSS=$(obj).css("-moz-transform") || $(obj).css("-webkit-transform") || $(obj).css("transform");
+      if(putCSS=="none"){
+        putaran=step; 
+      }else{
+        nilput=putCSS.replace("rotate(","").replace("deg)","");
+      }
+      if(e.shiftKey){putaran=parseFloat(nilput)-step;}
+      else{putaran=parseFloat(nilput)+step;}
+      putar(obj,putaran);
+    }
+    
+    function geser_jarum(e){
+      var obj=$("#jarum");  //objek jarum
+      var step=stepjarum;
+      if(e.ctrlKey){step=stepjarum/4;} else {step=stepjarum;}
+      if(e.which==37){derajadjarum-=step;}
+      if(e.which==39){derajadjarum+=step;}
+      if(derajadjarum>batasjarumR)derajadjarum=batasjarumR;
+      if(derajadjarum<batasjarumL)derajadjarum=batasjarumL;
+      putar(obj,derajadjarum.toFixed(8));
+    }
+
+    //mengubah batas KIRI atau KANAN jarum
+    //simulasi INFINITY dan ZERO OHM ADJ
+    function batas_jarum(e,LR){
+      var step=stepjarum/4;
+      var batas="";
+      if(LR=="L"){
+        if(e.shiftKey){batasjarumL-=step;} else {batasjarumL+=step;}
+        batas=batasjarumL;
+      }else{
+        if(e.shiftKey){batasjarumR-=step;} else {batasjarumR+=step;}
+        batas=batasjarumR;
+      }
+      $.get("session_adj.php?oper=set&adj="+LR+"&data="+batas,function(respon){
+        //alert("set"+respon);
+      });
+    }
+
+    function geser_selektor(e){
+      var obj=$("#sel_knob");  //objek selektor
+      var ds=parseFloat(derajadSelektor);
+      var ss=parseFloat(stepSelektor);
+      if(e.which==38){ds-=ss;}
+      else if(e.which==40){ds+=ss;}
+      else if(e.shiftKey){ds-=ss;}
+      else{ds+=ss;}
+      putar(obj,ds);
+      derajadSelektor=ds;
+    }
+
+    function crosshair(e,container,visib){
+      if(visib){
+        var offs=$(container).offset();
+        $(container).css("cursor","none");
+        $("#koordinat,.horizontal,.vertical").css("visibility","visible");
+        $("#koordinat").html($("#body").attr("style")+" "+(e.pageX-offs.left)+","+e.pageY);
+        $(".horizontal").css({"top":e.pageY});
+        $(".vertical").css({"left":(e.pageX-offs.left)});
+      }else{
+        $(".horizontal,.vertical").css("visibility","hidden");
+        $(container).css("cursor","context-menu");
+      }
+    } 
+
+    function ganti_instrumen(e){
+      $.post("session.php?oper=getindex",function(idx){
+        if(idx>=1 && idx<instrumcount){
+          if(e.shiftKey){idx--;}else{idx++;}
+          if(idx<1)idx=1;
+        }else{
+          idx=1;
+        }
+        $.get("session.php?oper=setindex&data="+idx,function(respon){
+          set_instrument();
+        })
+      })
+    }    
+   
+///-------------------------------------------------------------------------------------
+  }); 
+</script>

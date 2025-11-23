@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html" />
+	<meta name="author" content="lolkittens" />
+
+	<title>Untitled 2</title>
+  <style>
+
+.cross {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.cross.v {
+  border-top: 1px solid #aaa;
+}
+
+.cross.h {
+  border-left: 1px solid #aaa;
+}  
+.x{
+  width:500px;
+  height:300px;
+}
+  </style>
+</head>
+
+<body>
+<div class="cross v"></div>
+<div class="cross h"></div>
+<div class="x"></div>
+
+
+</body>
+</html>
+<script type="text/javascript" src="js/jquery-1.2.6.min.js"></script>
+<script>
+
+$(document).mousemove(function(e) {
+    $('.cross.v').css({top: e.pageY});
+    $('.cross.h').css({left: e.pageX});
+});
+</script>
